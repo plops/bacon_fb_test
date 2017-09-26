@@ -1,4 +1,4 @@
-
+```
 here are some commands that i used to get a debian chroot environment on the phone
 
 # group 3003
@@ -66,3 +66,4 @@ i i x
 
 stop zygote
 stop surfaceflinger
+```
