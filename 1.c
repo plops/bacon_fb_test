@@ -7,6 +7,7 @@
 #include <sys/ioctl.h>
 #include <stdint.h>
 #include "msm_mdp.h"
+#include <string.h>
 
 int main()
 {
