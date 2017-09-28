@@ -66,4 +66,10 @@ i i x
 
 stop zygote
 stop surfaceflinger
+
+
+Thanks:
+
+The main work was done by https://github.com/peterbjornx. He figured out the required ioctls by looking at strace outputs of surfaceflinger.
+
 ```
