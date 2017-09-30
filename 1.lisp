@@ -30,22 +30,26 @@
     (format s "#include \"/tmp/frame0.h\"~%")
     (format s "#include \"/tmp/frame_macros.h\"~%")))
 
-
-(c-include "/usr/include/linux/types.h")
-(c-include "/usr/include/linux/fb.h")
-
-(c-include "msm_mdp.h" :trace-c2ffi t :exclude-arch ("i386-unknown-freebsd"
-						      "i386-unknown-openbsd"
-						      "i686-apple-darwin9"
-						      "i686-pc-linux-gnu"
-						      "i686-pc-windows-msvc"
-						      "x86_64-apple-darwin9"
-						      "x86_64-pc-linux-gnu"
-						      "x86_64-pc-windows-msvc"
-						      "x86_64-unknown-freebsd"
-						      "x86_64-unknown-openbsd"
+(c-include "/tmp/frame1.h"
+	   :trace-c2ffi t
+	   ;; :spec-path "/tmp"
+	   ;;:exclude-sources ("")
+	   :include-sources ("/usr/include/linux/ioctl.h"
+			     "/usr/include/linux/fb.h")
+	   :exclude-arch ("i386-unknown-freebsd"
+			  "i386-unknown-openbsd"
+			  "i686-apple-darwin9"
+			  "i686-pc-linux-gnu"
+			  "i686-pc-windows-msvc"
+			  "x86_64-apple-darwin9"
+			  "x86_64-pc-linux-gnu"
+			  "x86_64-pc-windows-msvc"
+			  "x86_64-unknown-freebsd"
+			  "x86_64-unknown-openbsd"
 						      
-						      ))
+			  ))
+
+
 
 (defctype off-t :int "C type off_t")
 
