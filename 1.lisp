@@ -1,10 +1,51 @@
 
-(ql:quickload :cffi)
+(ql:quickload :cl-autowrap)
+
+
 
 (defpackage :g (:use :cl
-		     :cffi
-		     ))
+		     :autowrap))
 (in-package :g)
+
+(progn
+  (with-open-file (s "/tmp/frame0.h"
+		     :direction :output
+		     :if-does-not-exist :create
+		     :if-exists :supersede)
+    (format s "#include \"/root/stage/bacon_fb_test/msm_mdp.h\"~%"))
+  (autowrap::run-check autowrap::*c2ffi-program*
+		       (autowrap::list "/tmp/frame0.h"
+				       "-D" "null"
+				       "-M" "/tmp/frame_macros.h"
+				       "-A" "arm-pc-linux-gnu"))
+  
+  (with-open-file (s "/tmp/frame1.h"
+		     :direction :output
+		     :if-does-not-exist :create
+		     :if-exists :supersede)
+
+    ;;(format s "#include <sys/types.h>~%")
+    ;;(format s "#include <sys/stat.h>~%")
+    ;;(format s "#include <sys/ioctl.h>~%")
+    (format s "#include \"/tmp/frame0.h\"~%")
+    (format s "#include \"/tmp/frame_macros.h\"~%")))
+
+
+(c-include "/usr/include/linux/types.h")
+(c-include "/usr/include/linux/fb.h")
+
+(c-include "msm_mdp.h" :trace-c2ffi t :exclude-arch ("i386-unknown-freebsd"
+						      "i386-unknown-openbsd"
+						      "i686-apple-darwin9"
+						      "i686-pc-linux-gnu"
+						      "i686-pc-windows-msvc"
+						      "x86_64-apple-darwin9"
+						      "x86_64-pc-linux-gnu"
+						      "x86_64-pc-windows-msvc"
+						      "x86_64-unknown-freebsd"
+						      "x86_64-unknown-openbsd"
+						      
+						      ))
 
 (defctype off-t :int "C type off_t")
 
@@ -66,19 +107,22 @@
   :rdwr                ;&hellip;
   :nonbloc
   :append
-      (:creat  #x0200))
+  (:creat  #x0200))
 
 (defcfun ("open" %open) :int
   (path :string)
   (flags open-flags)
   (mode :uint16)) ; unportable
 
+
+#+nil
 (defparameter *fd* (%open "/dev/graphics/fb0" '(:rdwr) #o644))
 
 
+#+nil
 (with-open-file (s (first (directory "/dev/graphics/fb*"))
 		   :direction :output
 		   :element-type '(unsigned-byte 8))
-   (let ((a (make-array (* 1920 1080 4) :element-type '(unsigned-byte 8)
+  (let ((a (make-array (* 1920 1080 4) :element-type '(unsigned-byte 8)
 		       :initial-element 255)))
     (write-sequence a s)))
