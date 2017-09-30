@@ -1,5 +1,6 @@
 
 (ql:quickload :cl-autowrap)
+(ql:quickload :cl-plus-c)
 
 
 
@@ -60,13 +61,24 @@
 
 (with-open-file (s "/dev/graphics/fb0" :direction :input
 		   :element-type '(unsigned-byte 8))
-  (let ((fd (sb-sys:fd-stream-fd s)))
-    (sb-posix:ioctl fd +FBIOGET-FSCREENINFO+ )
+  (let ((fd (sb-sys:fd-stream-fd s))
+	)
+    (plus-c:c-let ((fix (:struct (fb-fix-screeninfo)) :free t))
+       (sb-posix:ioctl fd +FBIOGET-FSCREENINFO+
+		       
+		       fix)
+      #+nil(autowrap:ptr fix)
+      #+nil
+      (sb-alien:sap-alien ))
     #+nil (sb-posix:mmap )))
 
+(plus-c:c-let ((fix (:struct (fb-fix-screeninfo)) :free t))
+)
+
+(sb-alien:sap-alien (sb-sys:int-sap 32) sb-alien:double )
 
 
-
+(type-of (sb-sys:int-sap 32)) 
 
 
   #+nil
