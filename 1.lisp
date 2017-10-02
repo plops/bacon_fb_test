@@ -65,7 +65,8 @@
   (let ((fd (sb-sys:fd-stream-fd s))
 	)
     (autowrap:with-alloc (c '(:struct (fb-fix-screeninfo)))
-      (assert (<= 0 (ioctl fd +FBIOGET-FSCREENINFO+ :pointer (AUTOWRAP:PTR c)))))
+      (assert (<= 0 (ioctl fd +FBIOGET-FSCREENINFO+ :pointer (AUTOWRAP:PTR c))))
+      (fb-fix-screeninfo.smem-len c))
     
     #+nil(plus-c:c-let ((fix (:struct (fb-fix-screeninfo)) :free t))
        (sb-posix:ioctl fd +FBIOGET-FSCREENINFO+
