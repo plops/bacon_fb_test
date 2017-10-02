@@ -1,4 +1,3 @@
-
 (ql:quickload :cl-autowrap)
 (ql:quickload :cl-plus-c)
 
@@ -59,11 +58,16 @@
 						      
 			  ))
 
+
+
 (with-open-file (s "/dev/graphics/fb0" :direction :input
 		   :element-type '(unsigned-byte 8))
   (let ((fd (sb-sys:fd-stream-fd s))
 	)
-    (plus-c:c-let ((fix (:struct (fb-fix-screeninfo)) :free t))
+    (autowrap:with-alloc (c '(:struct (fb-fix-screeninfo)))
+      (assert (<= 0 (ioctl fd +FBIOGET-FSCREENINFO+ :pointer (AUTOWRAP:PTR c)))))
+    
+    #+nil(plus-c:c-let ((fix (:struct (fb-fix-screeninfo)) :free t))
        (sb-posix:ioctl fd +FBIOGET-FSCREENINFO+
 		       
 		       fix)
