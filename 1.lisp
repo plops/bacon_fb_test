@@ -13,7 +13,9 @@
 		     :if-does-not-exist :create
 		     :if-exists :supersede)
     (format s "#include \"/root/stage/bacon_fb_test/msm_mdp.h\"~%")
-    (format s "#include <sys/mman.h>"))
+    (format s "#include <sys/mman.h>~%")
+    ;(format s "#include <errno.h>~%")
+    )
   (autowrap::run-check autowrap::*c2ffi-program*
 		       (autowrap::list "/tmp/frame0.h"
 				       "-D" "null"
@@ -41,8 +43,9 @@
   
 (c-include "/tmp/frame1.h"
 	   :trace-c2ffi t
-	   ;; :spec-path "/tmp"
+	   :spec-path "/root/stage/bacon_fb_test/"
 	   ;;:exclude-sources ("")
+	   ; :exclude-definitions ("*")
 	   :sysincludes '("/usr/include/arm-linux-gnueabihf/")
 	   :include-sources ("/usr/include/linux/ioctl.h"
 			     "/usr/include/linux/fb.h")
@@ -56,8 +59,9 @@
 			  "x86_64-pc-windows-msvc"
 			  "x86_64-unknown-freebsd"
 			  "x86_64-unknown-openbsd"
-			  ))
-
+			  )
+	   :include-definitions ("FB*" "MDP*" "mdp*" "fb*" "mmap" "munmap"))
+(cffi:defcvar "errno" :int)
 
 
 (with-open-file (s "/dev/graphics/fb0" :direction :input
@@ -86,8 +90,9 @@
 		 (smem-len (fb-fix-screeninfo.smem-len finfo))
 		 (fbp (mmap (cffi:null-pointer) smem-len (logior +PROT-READ+ +PROT-WRITE+)
 			    +MAP-SHARED+ fd 0)))
+	    (format t "fbp=~a ~a" fbp errno) ;; errno = 13 permission denied
 	    (assert (/= (sb-sys:sap-int fbp) #XFFFFFFFF))
-	    (format t "fbp=~a" fbp)
+	    
 	    (munmap fbp smem-len)))))))
 
 (sb-sys:sap-int *fbp*)
