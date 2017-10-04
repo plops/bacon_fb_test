@@ -86,8 +86,11 @@
 		 (smem-len (fb-fix-screeninfo.smem-len finfo))
 		 (fbp (mmap (cffi:null-pointer) smem-len (logior +PROT-READ+ +PROT-WRITE+)
 			    +MAP-SHARED+ fd 0)))
-	    (assert (/= -1 fbp))
-	   (munmap fbp smem-len)))))))
+	    (assert (/= (sb-sys:sap-int fbp) #XFFFFFFFF))
+	    (format t "fbp=~a" fbp)
+	    (munmap fbp smem-len)))))))
+
+(sb-sys:sap-int *fbp*)
 
 (plus-c:c-let ((fix (:struct (fb-fix-screeninfo)) :free t))
 )
