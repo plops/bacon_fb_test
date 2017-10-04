@@ -12,7 +12,8 @@
 		     :direction :output
 		     :if-does-not-exist :create
 		     :if-exists :supersede)
-    (format s "#include \"/root/stage/bacon_fb_test/msm_mdp.h\"~%"))
+    (format s "#include \"/root/stage/bacon_fb_test/msm_mdp.h\"~%")
+    (format s "#include <sys/mman.h>"))
   (autowrap::run-check autowrap::*c2ffi-program*
 		       (autowrap::list "/tmp/frame0.h"
 				       "-D" "null"
@@ -62,19 +63,33 @@
 
 (with-open-file (s "/dev/graphics/fb0" :direction :input
 		   :element-type '(unsigned-byte 8))
-  (let ((fd (sb-sys:fd-stream-fd s))
-	)
-    (autowrap:with-alloc (c '(:struct (fb-fix-screeninfo)))
-      (assert (<= 0 (ioctl fd +FBIOGET-FSCREENINFO+ :pointer (AUTOWRAP:PTR c))))
-      (fb-fix-screeninfo.smem-len c))
+  (let ((fd (sb-sys:fd-stream-fd s)))
+    (autowrap:with-alloc (finfo '(:struct (fb-fix-screeninfo)))
+      (assert (<= 0 (ioctl fd +FBIOGET-FSCREENINFO+ :pointer (AUTOWRAP:PTR finfo))))
+      (autowrap:with-alloc (vinfo '(:struct (fb-var-screeninfo)))
+	(assert (<= 0 (ioctl fd +FBIOGET-VSCREENINFO+ :pointer (AUTOWRAP:PTR vinfo))))
+	(setf (fb-var-screeninfo.activate vinfo) +FB-ACTIVATE-FORCE+
+	      ;;(fb-var-screeninfo.yoffset vinfo) 0
+	      )
+	(autowrap:with-alloc (commit '(:struct (mdp-display-commit)))
+	  (autowrap::c-memset (autowrap:ptr commit) 0 (autowrap:sizeof '(:struct (mdp-display-commit))))
+	  (setf (mdp-display-commit.flags commit)
+		(logior +MDP-DISPLAY-COMMIT-OVERLAY+ (mdp-display-commit.flags commit)))
+	  (autowrap::c-memcpy (mdp-display-commit.var& commit)
+			      (autowrap:ptr vinfo)
+			      (autowrap:sizeof '(:struct (fb-var-screeninfo))))
+	  (assert (<= 0 (ioctl fd +MSMFB-DISPLAY-COMMIT+ :pointer (AUTOWRAP:PTR commit))))
+	  (assert (<= 0 (ioctl fd +FBIOPUT-VSCREENINFO+ :pointer (AUTOWRAP:PTR vinfo))))
+	  (let* ((screensize (/ (* (fb-var-screeninfo.xres-virtual vinfo)
+				   (fb-var-screeninfo.yres-virtual vinfo)
+				   (fb-var-screeninfo.bits-per-pixel vinfo))
+				8))
+		 (smem-len (fb-fix-screeninfo.smem-len finfo))
+		 (fbp (mmap 0 smem-len (logior +PROT-READ+ +PROT-WRITE+)
+			    +MAP-SHARED+ fd 0)))
+	    (assert (!= -1 fbp))
+	    (munmap fbp smem-len)))))
     
-    #+nil(plus-c:c-let ((fix (:struct (fb-fix-screeninfo)) :free t))
-       (sb-posix:ioctl fd +FBIOGET-FSCREENINFO+
-		       
-		       fix)
-      #+nil(autowrap:ptr fix)
-      #+nil
-      (sb-alien:sap-alien ))
     #+nil (sb-posix:mmap )))
 
 (plus-c:c-let ((fix (:struct (fb-fix-screeninfo)) :free t))
