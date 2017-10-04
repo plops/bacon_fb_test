@@ -40,12 +40,17 @@
     (format s "#include <stdint.h>~%") ;; uint32_t
     (format s "#include \"/tmp/frame0.h\"~%")
     (format s "#include \"/tmp/frame_macros.h\"~%")))
-  
+
+
+#+nil
+(delete-file (directory "/root/stage/bacon_fb_test/frame*spec"))
+
 (c-include "/tmp/frame1.h"
 	   :trace-c2ffi t
 	   :spec-path "/root/stage/bacon_fb_test/"
 	   ;;:exclude-sources ("")
-	   ; :exclude-definitions ("*")
+	   :exclude-definitions (".*"
+				"__*")
 	   :sysincludes '("/usr/include/arm-linux-gnueabihf/")
 	   :include-sources ("/usr/include/linux/ioctl.h"
 			     "/usr/include/linux/fb.h")
@@ -60,7 +65,18 @@
 			  "x86_64-unknown-freebsd"
 			  "x86_64-unknown-openbsd"
 			  )
-	   :include-definitions ("FB*" "MDP*" "mdp*" "fb*" "mmap" "munmap"))
+	   :include-definitions (
+				 "FBIOPUT_VSCREENINFO"
+				 "FBIOPUT_FSCREENINFO"
+					;"MSMFB*" "MDP-DISPLAY-COMMIT" "FB-VAR*" "fb-fix*"
+				 "fb_var_screeninfo"
+				 "fb_fix_screeninfo"
+				 "mdp_diplay_commit"
+				 "MDP_DISPLAY_COMMIT_OVERLAY"
+				 "mmap" "munmap" "ioctl"
+)
+	   )
+
 (cffi:defcvar "errno" :int)
 
 
@@ -93,7 +109,10 @@
 			    +MAP-SHARED+ fd 0)))
 	    (format t "fbp=~a ~a" fbp errno) ;; errno = 13 permission denied
 	    (assert (/= (sb-sys:sap-int fbp) #XFFFFFFFF))
-	    
+
+	    (autowrap::c-memset (autowrap:ptr fbp) 255 smem-len)
+	    (assert (<= 0 (ioctl fd +FBIOPUT-VSCREENINFO+ :pointer (AUTOWRAP:PTR vinfo))))
+	    (sleep 3)
 	    (munmap fbp smem-len)))))
     (sb-posix:close fd)))
 
