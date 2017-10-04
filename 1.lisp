@@ -43,8 +43,9 @@
 
 
 #+nil
-(delete-file (directory "/root/stage/bacon_fb_test/frame*spec"))
-
+(delete-file )
+#+nil
+(directory "/root/stage/bacon_fb_test/*spec")
 (c-include "/tmp/frame1.h"
 	   :trace-c2ffi t
 	   :spec-path "/root/stage/bacon_fb_test/"
@@ -65,14 +66,24 @@
 			  "x86_64-unknown-freebsd"
 			  "x86_64-unknown-openbsd"
 			  )
-	   :include-definitions (
+	   :include-definitions ("__u32"
+				 "uint32_t"
+				 "size_t"
+				 "__off_t"
+				 "FBIOGET_VSCREENINFO"
 				 "FBIOPUT_VSCREENINFO"
+				 "FBIOGET_FSCREENINFO"
 				 "FBIOPUT_FSCREENINFO"
-					;"MSMFB*" "MDP-DISPLAY-COMMIT" "FB-VAR*" "fb-fix*"
+				 "FB_ACTIVATE_FORCE"
 				 "fb_var_screeninfo"
 				 "fb_fix_screeninfo"
-				 "mdp_diplay_commit"
+				 "mdp_display_commit"
+				 "mdp_rect"
 				 "MDP_DISPLAY_COMMIT_OVERLAY"
+				 "MSMFB_DISPLAY_COMMIT"
+				 "MAP_SHARED"
+				 "PROT_READ"
+				 "PROT_WRITE"
 				 "mmap" "munmap" "ioctl"
 )
 	   )
