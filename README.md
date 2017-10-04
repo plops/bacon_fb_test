@@ -38,6 +38,9 @@ fbterm < /dev/tty
 
 apt install make
 
+
+to wake up android when it is getting sluggish: adb shell input keyevent KEYCODE_WAKEUP
+
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
 M-x package-list
 paredit ido-hacks

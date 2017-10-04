@@ -56,7 +56,6 @@
 			  "x86_64-pc-windows-msvc"
 			  "x86_64-unknown-freebsd"
 			  "x86_64-unknown-openbsd"
-						      
 			  ))
 
 
@@ -85,12 +84,10 @@
 				   (fb-var-screeninfo.bits-per-pixel vinfo))
 				8))
 		 (smem-len (fb-fix-screeninfo.smem-len finfo))
-		 (fbp (mmap 0 smem-len (logior +PROT-READ+ +PROT-WRITE+)
+		 (fbp (mmap (cffi:null-pointer) smem-len (logior +PROT-READ+ +PROT-WRITE+)
 			    +MAP-SHARED+ fd 0)))
-	    (assert (!= -1 fbp))
-	    (munmap fbp smem-len)))))
-    
-    #+nil (sb-posix:mmap )))
+	    (assert (/= -1 fbp))
+	   (munmap fbp smem-len)))))))
 
 (plus-c:c-let ((fix (:struct (fb-fix-screeninfo)) :free t))
 )
