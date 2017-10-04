@@ -64,9 +64,10 @@
 (cffi:defcvar "errno" :int)
 
 
-(with-open-file (s "/dev/graphics/fb0" :direction :input
-		   :element-type '(unsigned-byte 8))
-  (let ((fd (sb-sys:fd-stream-fd s)))
+(progn ; with-open-file (s "/dev/graphics/fb0" :direction :io :element-type '(unsigned-byte 8))
+  (let ((fd ;(sb-sys:fd-stream-fd s)
+	 (sb-posix:open "/dev/graphics/fb0" sb-posix:o-rdwr)
+	 ))
     (autowrap:with-alloc (finfo '(:struct (fb-fix-screeninfo)))
       (assert (<= 0 (ioctl fd +FBIOGET-FSCREENINFO+ :pointer (AUTOWRAP:PTR finfo))))
       (autowrap:with-alloc (vinfo '(:struct (fb-var-screeninfo)))
@@ -93,9 +94,12 @@
 	    (format t "fbp=~a ~a" fbp errno) ;; errno = 13 permission denied
 	    (assert (/= (sb-sys:sap-int fbp) #XFFFFFFFF))
 	    
-	    (munmap fbp smem-len)))))))
+	    (munmap fbp smem-len)))))
+    (sb-posix:close fd)))
 
 (sb-sys:sap-int *fbp*)
+
+(logior +PROT-READ+ +PROT-WRITE+)
 
 (plus-c:c-let ((fix (:struct (fb-fix-screeninfo)) :free t))
 )
