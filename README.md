@@ -1,3 +1,34 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/plops/bacon_fb_test)
+
+# Purpose and Scope
+
+The bacon_fb_test repository demonstrates direct framebuffer manipulation on Android devices with Qualcomm Mobile Display Processor (MDP) hardware. It provides two parallel implementations—one in C and one in Common Lisp—that bypass the Android graphics stack to achieve low-level access to /dev/graphics/fb0. The primary purpose is to showcase advanced Foreign Function Interface (FFI) techniques for hardware control from high-level languages, particularly using cl-autowrap and cl-plus-c to generate Lisp bindings from C headers.
+
+# Qualcomm MSM MDP Hardware Interface
+
+The Qualcomm Mobile Display Processor (MDP) hardware interface as defined in msm_mdp.h. The MDP is part of Qualcomm's Mobile Display SubSystem (MDSS) and provides hardware-accelerated display composition, image processing, and buffer management for Snapdragon SoCs.
+
+The interface exposes MDP functionality through:
+
+* IOCTL commands (MSMFB_* family) for controlling display operations
+* Data structures for configuring overlays, blitting, and post-processing
+* Hardware capability detection and metadata queries
+* Buffer synchronization mechanisms using fence file descriptors
+
+This interface extends the standard Linux framebuffer API (see Linux Framebuffer API Integration) with Qualcomm-specific features.
+
+The MDP provides advanced graphics capabilities beyond standard Linux framebuffer operations, including:
+
+- Multi-layer hardware composition with up to 4 z-order layers
+- Hardware-accelerated scaling and rotation
+- Color space conversion and post-processing effects
+- Overlay management with multiple pipe types (VIG, RGB, DMA)
+- Writeback capture for screen recording
+- Buffer synchronization with fence mechanisms
+- IOMMU-based memory protection for secure content
+
+
+
 ```
 here are some commands that i used to get a debian chroot environment on the phone
 
